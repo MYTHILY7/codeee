@@ -11,14 +11,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 CATEGORY_NAMES = {
-    "CurrentTrends": "🔍 Current Trends",
-    "LearnTechnologies": "📚 Learn Technologies",
+    "CurrentTrends": "⌚️ Current Trends",
+    "LearnTechnologies": "🧑🏽‍💻 Learn Technologies",
     "NewTools": "🛠️ New Tools",
     "UseCases": "💡 Use Cases"
 }
 
 # Path to AI banner image (you can upload it to a static server or encode it as base64 if needed)
-AI_BANNER_URL = "https://yourserver.com/static/ai_digest_banner.png"  # Replace with actual URL
+AI_BANNER_URL = "https://raw.githubusercontent.com/MYTHILY7/codeee/refs/heads/main/hexa%20logo.png"  # Replace with actual URL
 
 def get_top_articles_by_category(session, category, max_count=3):
     selected = []
@@ -53,7 +53,7 @@ def get_top_articles_by_category(session, category, max_count=3):
 def send_summary_email():
     session = Session()
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = "📰 Weekly AI DIGEST"
+    msg["Subject"] = " Weekly AI DIGEST"
     msg["From"] = EMAIL_ADDRESS
     msg["To"] = ", ".join(RECIPIENTS)
 
@@ -63,7 +63,8 @@ def send_summary_email():
     <body style="font-family:Arial, sans-serif; color:#222; background-color:#f7f7f7; padding:20px;">
         <div style="max-width:700px; margin:auto; background:white; padding:20px; border-radius:10px;">
             <img src="{AI_BANNER_URL}" alt="AI Digest Banner" style="width:100%; border-radius:10px 10px 0 0;"/>
-            <h1 style="text-align:center; color:#333; margin-top:20px;">📰 AI DIGEST</h1>
+            <h1 style="text-align:center; color:#D60000; font-weight:900; font-size:36px; font-family:'Georgia', serif; margin-top:20px;">
+            <span style="letter-spacing:2px;">AI DIGEST</span></h1>
             <p style="text-align:center; color:#888;">Curated updates from the world of Artificial Intelligence</p>
             <hr style="border:0; height:1px; background:#eee;"/>
     """
@@ -71,7 +72,7 @@ def send_summary_email():
     sent_articles = []
 
     for cat, display_name in CATEGORY_NAMES.items():
-        html += f"<h2 style='color:#0066cc;'>{display_name}</h2>"
+        html += f"<h2 style='color:#8b008b;'>{display_name}</h2>"
         new_articles = get_top_articles_by_category(session, cat, max_count=3)
 
         if not new_articles:
@@ -82,7 +83,7 @@ def send_summary_email():
         for art in new_articles:
             html += f"""
                 <div style="margin-bottom:15px;">
-                    <a href="{art.url}" style="text-decoration:none; color:#222;">
+                    <a href="{art.url}" style="text-decoration:none; color:#00488b;">
                         <strong>{art.title}</strong>
                     </a><br/>
                     <small style="color:#555;">{art.summary.strip()}</small>
@@ -90,15 +91,6 @@ def send_summary_email():
             """
         sent_articles.extend(new_articles)
 
-    html += """
-            <hr style="margin-top:40px; border:0; height:1px; background:#eee;"/>
-            <p style="font-size:12px; color:#999; text-align:center;">
-                You're receiving this newsletter because you subscribed to AI DIGEST.
-            </p>
-        </div>
-    </body>
-    </html>
-    """
 
     session.close()
     msg.attach(MIMEText(html, "html"))
