@@ -2,6 +2,7 @@ import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from datetime import datetime
 
 from db_setup import ProcessedArticle, IssueHistory, Session
 from config import EMAIL_HOST, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD, RECIPIENTS
@@ -17,8 +18,7 @@ CATEGORY_NAMES = {
     "UseCases": "💡 Use Cases"
 }
 
-# Path to AI banner image (you can upload it to a static server or encode it as base64 if needed)
-AI_BANNER_URL = "https://raw.githubusercontent.com/MYTHILY7/codeee/refs/heads/main/hexa%20logo.png"  # Replace with actual URL
+AI_BANNER_URL = "https://raw.githubusercontent.com/MYTHILY7/codeee/refs/heads/main/hexa%20logo.png"
 
 def get_top_articles_by_category(session, category, max_count=3):
     selected = []
@@ -53,18 +53,23 @@ def get_top_articles_by_category(session, category, max_count=3):
 def send_summary_email():
     session = Session()
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = " Weekly AI DIGEST"
+    msg["Subject"] = "📰 Weekly AI DIGEST"
     msg["From"] = EMAIL_ADDRESS
     msg["To"] = ", ".join(RECIPIENTS)
 
-    # HTML Template
+    # 🗓️ Format today's date
+    today = datetime.now().strftime("%A, %B %d, %Y")
+
+    # 📨 HTML email template
     html = f"""
     <html>
     <body style="font-family:Arial, sans-serif; color:#222; background-color:#f7f7f7; padding:20px;">
         <div style="max-width:700px; margin:auto; background:white; padding:20px; border-radius:10px;">
             <img src="{AI_BANNER_URL}" alt="AI Digest Banner" style="width:100%; border-radius:10px 10px 0 0;"/>
             <h1 style="text-align:center; color:#D60000; font-weight:900; font-size:36px; font-family:'Georgia', serif; margin-top:20px;">
-            <span style="letter-spacing:2px;">AI DIGEST</span></h1>
+                <span style="letter-spacing:2px;">AI DIGEST</span>
+            </h1>
+            <p style="text-align:center; color:#aaa; font-size:14px; margin-top:-10px;">{today}</p>
             <p style="text-align:center; color:#888;">Curated updates from the world of Artificial Intelligence</p>
             <hr style="border:0; height:1px; background:#eee;"/>
     """
@@ -72,7 +77,7 @@ def send_summary_email():
     sent_articles = []
 
     for cat, display_name in CATEGORY_NAMES.items():
-        html += f"<h2 style='color:#8b008b;'>{display_name}</h2>"
+        html += f"<h2 style='color:#f5f5dc; background-color:#333; padding:5px 10px; border-radius:5px;'>{display_name}</h2>"
         new_articles = get_top_articles_by_category(session, cat, max_count=3)
 
         if not new_articles:
@@ -83,7 +88,7 @@ def send_summary_email():
         for art in new_articles:
             html += f"""
                 <div style="margin-bottom:15px;">
-                    <a href="{art.url}" style="text-decoration:none; color:#00488b;">
+                    <a href="{art.url}" style="text-decoration:none; color:#add8e6;">
                         <strong>{art.title}</strong>
                     </a><br/>
                     <small style="color:#555;">{art.summary.strip()}</small>
@@ -91,7 +96,7 @@ def send_summary_email():
             """
         sent_articles.extend(new_articles)
 
-
+    html += "</div></body></html>"
     session.close()
     msg.attach(MIMEText(html, "html"))
 
